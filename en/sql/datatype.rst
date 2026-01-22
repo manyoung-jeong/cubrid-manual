@@ -1145,7 +1145,7 @@ When the length of a character string exceeds *n*, they may be truncated in the 
 
 .. note:: In the earlier versions of CUBRID 9.0, *n* represents byte length, not the number of characters.
 
-*   *n* is an integer between 1 and 268,435,455 (256M).
+*   *n* specifies the number of bytes, ranging from 1 to 2048, and defines a fixed-length character type that allocates storage of the specified size.
 
 *   Empty quotes (' ') are used to represent a blank string. In this case, the return value of the **LENGTH** function is not 0, but is the fixed length defined in **CHAR** (*n*). That is, if you enter a blank string into a column with **CHAR** (10), the **LENGTH** is 10; if you enter a blank value into a **CHAR** with no length specified, the **LENGTH** is the default value 1.
 
@@ -1851,8 +1851,8 @@ When you get a **LOB** type column, the data stored in a file to which the colum
     *   From CUBRID 11.4, the locator, which represents the LOB file path, **changed from an absolute file path to a relative one**. The relative path starts from '**lob-base-path**' in databases.txt. With this change, LOB file path management has become more flexible, and LOB file path problems have been reduced during database moves, backups, and restores.
     *   For example, if the '**lob-base-path**' path defined in databases.txt is /home1/data1, an example of the locator for each CUBRID version is as follows.
 
-        * **CUBRID 11.4** (**relative**): file:ces_004/doc_t.00001366272829040346_0773
-        * up to CUBRID 11.3 (**absolute**): file:/home1/data1/ces_004/doc_t.00001366272829040346_0773
+        * **CUBRID 11.4** (**relative**): `file:ces_004/doc_t.00001366272829040346_0773`
+        * up to CUBRID 11.3 (**absolute**): `file:/home1/data1/ces_004/doc_t.00001366272829040346_0773`
     *   Due to the locator being stored as a relative path, if ‘**lob-base-path**’ in databases.txt is changed,
 
         * Previously created LOB data cannot be retrieved.

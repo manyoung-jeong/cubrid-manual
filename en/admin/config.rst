@@ -169,7 +169,7 @@ On the below table, if "Applied" is "server parameter", that parameter affects t
 |                               +-------------------------------------+-------------------------+---------+----------+--------------------------------+-----------------------+
 |                               | volume_extension_path               | server parameter        |         | string   | NULL                           |                       |
 |                               +-------------------------------------+-------------------------+---------+----------+--------------------------------+-----------------------+
-|                               | double_write_buffer_size            | server parameter        |         | byte     | 2M                             |                       |
+|                               | double_write_buffer_size            | server parameter        |         | byte     | 2,097,152(2M)                  |                       |
 |                               +-------------------------------------+-------------------------+---------+----------+--------------------------------+-----------------------+
 |                               | data_file_os_advise                 | server parameter        |         | int      | 0                              |                       |
 +-------------------------------+-------------------------------------+-------------------------+---------+----------+--------------------------------+-----------------------+
@@ -771,27 +771,27 @@ Disk-Related Parameters
 
 The following are disk-related parameters for defining database volumes and storing files. The type and value range for each parameter are as follows:
 
-+------------------------------------------+--------+----------+----------+----------+
-| Parameter Name                           | Type   | Default  | Min      | Max      |
-+==========================================+========+==========+==========+==========+
-| db_volume_size                           | byte   | 512M     | 0        | 20G      |
-+------------------------------------------+--------+----------+----------+----------+
-| dont_reuse_heap_file                     | bool   | no       |          |          |
-+------------------------------------------+--------+----------+----------+----------+
-| log_volume_size                          | byte   | 512M     | 20M      | 4G       |
-+------------------------------------------+--------+----------+----------+----------+
-| temp_file_max_size_in_pages              | int    | -1       |          |          |
-+------------------------------------------+--------+----------+----------+----------+
-| temp_volume_path                         | string | NULL     |          |          |
-+------------------------------------------+--------+----------+----------+----------+
-| unfill_factor                            | float  | 0.1      | 0.0      | 0.3      |
-+------------------------------------------+--------+----------+----------+----------+
-| volume_extension_path                    | string | NULL     |          |          |
-+------------------------------------------+--------+----------+----------+----------+
-| double_write_buffer_size                 | byte   | 2M       | 0        | 32M      |
-+------------------------------------------+--------+----------+----------+----------+
-| data_file_os_advise                      | int    | 0        | 0        | 6        |
-+------------------------------------------+--------+----------+----------+----------+
++------------------------------------------+--------+-------------------+---------+---------------------+
+| Parameter Name                           | Type   | Default           | Min     | Max                 |
++==========================================+========+===================+=========+=====================+
+| db_volume_size                           | byte   | 512M              | 0       | 20G                 |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| dont_reuse_heap_file                     | bool   | no                |         |                     |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| log_volume_size                          | byte   | 512M              | 20M     | 4G                  |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| temp_file_max_size_in_pages              | int    | -1                |         |                     |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| temp_volume_path                         | string | NULL              |         |                     |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| unfill_factor                            | float  | 0.1               | 0.0     | 0.3                 |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| volume_extension_path                    | string | NULL              |         |                     |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| double_write_buffer_size                 | byte   | 2,097,152 (2M)    | 0       | 33,554,432 (32M)    |
++------------------------------------------+--------+-------------------+---------+---------------------+
+| data_file_os_advise                      | int    | 0                 | 0       | 6                   |
++------------------------------------------+--------+-------------------+---------+---------------------+
 
 **db_volume_size**
 
@@ -835,6 +835,7 @@ The following are disk-related parameters for defining database volumes and stor
 **double_write_buffer_size**
 
     **double_write_buffer_size** is a parameter to configure the memory and disk size of double writer buffer. Double write buffer protection against partial I/O writes can be disabled by setting this size to zero. By default, it is enabled and its size is 2M.
+    The value operates in bytes, and must be set within the range of 2,097,152 bytes (minimum) to 33,554,432 bytes (maximum).
 
 **data_file_os_advise**
 
@@ -1189,13 +1190,13 @@ The following are parameters related to logs used for database backup and restor
 
     If the value of the **log_buffer_size** parameter is large, performance can be improved (due to the decrease in disk I/O) in an environment where transactions are long and numerous. Moreover, CUBRID Multiversion Concurrency Control system relies on log to access previous row versions and to vacuum invisible versions from database. It is recommended to configure an appropriate value considering the memory size and operations of the system where CUBRID is installed.
 
-    *   Required memory size = the size of log buffer (**log_buffer_size**)
+    *   Required memory size = the size of log buffer (**log_buffer_size**\)
 
 .. _log_max_archives: 
 
 **log_max_archives**
 
-    **log_max_archives** is a parameter to configure the maximum number of archive log files. The minimum value is 0 and default value is **INT_MAX** (2,147,483,647). Its operations can differ depending on the configuration of **force_remove_log_archives**. For example, when **log_max_archives** is 3 and **force_remove_log_archives** is **yes** in the cubrid.conf file, the most recent three archive log files are recorded and when a fourth archiving log file is generated, the oldest archive log file is automatically deleted; the information about the deleted archive logs are recorded in the ***_lginf** file.
+    **log_max_archives** is a parameter to configure the maximum number of archive log files. The minimum value is 0 and default value is **INT_MAX** (2,147,483,647). Its operations can differ depending on the configuration of **force_remove_log_archives**. For example, when **log_max_archives** is 3 and **force_remove_log_archives** is **yes** in the cubrid.conf file, the most recent three archive log files are recorded and when a fourth archiving log file is generated, the oldest archive log file is automatically deleted; the information about the deleted archive logs are recorded in the ***_lginf** file. When a user sets ha_mode=off and force_remove_log_archives=n, the system automatically assigns the value of INT_MAX (2,147,483,647) to log_max_archives instead of the value entered by the user.
 
     However, if an active transaction still refers to an existing archive log file, the archive log file will not be deleted. That is, if a transaction starts at the point that the first archive log file is generated, and it is still active until the fifth archive log is generated, the first archive log file cannot be deleted.
 
